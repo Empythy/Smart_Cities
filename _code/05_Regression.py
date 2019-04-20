@@ -1,5 +1,9 @@
 
 ################ CHECK FOR APPROPRIATENESS OF DUMMY/CONTINUOUS
+
+########### also maybe hold out components of AQI, then predict them after
+
+
 import pandas as pd
 import matplotlib
 import numpy as np
