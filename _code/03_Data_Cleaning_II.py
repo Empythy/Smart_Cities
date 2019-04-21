@@ -60,7 +60,7 @@ night = night.append(hour_cols[:5])
 data['morning'] = data[morning].sum(axis=1)
 data['mid_day'] = data[mid_day].sum(axis=1)
 data['evening'] = data[evening].sum(axis=1)
-data['night'] = data[night].sum(axis=1)
+# data['night'] = data[night].sum(axis=1) dummy vars that sum to 1 not needed
 
 data.drop(columns=hour_cols, inplace=True)
 
