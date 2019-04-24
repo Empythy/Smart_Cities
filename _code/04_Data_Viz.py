@@ -5,7 +5,10 @@ import pandas as pd
 import os
 import seaborn as sb
 
-
+# todo make color scheme make sense
+# todo make this a data exploration file and another after modelins?
+# todo distribution of classifications for modal naive guess
+# todo can we export classifications to excel and color code? can we do it in mpl?
 os.chdir(os.getcwd())
 # os.chdir('C:\\Users\\Dan Herweg\\PycharmProjects\\Smart_Cities')
 
