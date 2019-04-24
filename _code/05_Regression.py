@@ -2,11 +2,14 @@
 ################ CHECK FOR APPROPRIATENESS OF DUMMY/CONTINUOUS
 
 ######## potential regressions
-# smooth predict y -> class
-# smooth predict class
-# smooth predict AQI components -> class (is this the same as 1?)
-# sub in raw to see if better fits
-# validate on an ongoing basis, last 20%, LOOCV?
+# todo next
+#   NN
+#   subset selection
+#   rerun this file with subset
+#   validation
+#   use raw
+#   predict components
+
 
 
 import numpy as np

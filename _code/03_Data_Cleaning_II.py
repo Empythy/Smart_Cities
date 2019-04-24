@@ -108,27 +108,6 @@ data.PM10
 data['AQI'] = ((data.PM10_24h_MA + data[['NO2_I','O3_8h_MA']].max(axis=1)) /2)*100
 
 
-#viz of AQI
-import matplotlib.pyplot as plt
-fig, ax = plt.subplots()
-ax.plot(data.index, data['AQI'], color='maroon')
-
-ax.xaxis_date()
-
-myFmt = mdat.DateFormatter('%b-%d')
-ax.xaxis.set_major_formatter(myFmt)  # https://stackoverflow.com/questions/14946371/editing-the-date-formatting-of-x-axis-tick-labels-in-matplotlib
-ax.xaxis.set_major_locator(ticker.MultipleLocator(10))  # https://stackoverflow.com/questions/54057567/matplotlib-uneven-intervals-between-x-axis-with-datetime
-## Rotate date labels automatically
-fig.autofmt_xdate()
-
-plt.title('AQI in Milan, Nov/Dec 2013')
-
-fig.savefig('.\\Smart_Cities\\_viz\\___AQI.png')
-plt.clf()
-plt.cla()
-plt.close()
-
-
 # drop some columns not needed for prediction
 data.drop(['NO2_I','O3_8h_MA','PM10_24h_MA'], axis=1, inplace=True)
 
