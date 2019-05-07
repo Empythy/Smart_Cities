@@ -1,15 +1,11 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdat
 import matplotlib.ticker as ticker
 import pandas as pd
 import os
 import seaborn as sb
-
-# todo make color scheme make sense
-# todo plot uncorrelated vars?
-# todo make this a data exploration file and another after modelins?
-# todo distribution of classifications for modal naive guess
-# todo can we export classifications to excel and color code? can we do it in mpl?
 
 os.chdir(os.getcwd())
 # os.chdir('C:\\Users\\Dan Herweg\\PycharmProjects\\Smart_Cities')
@@ -40,6 +36,25 @@ plt.clf()
 plt.cla()
 plt.close()
 
+#Second viz of AQI
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots()
+ax.plot(data.index, data['AQI'], color='grey')
+
+ax.xaxis_date()
+
+myFmt = mdat.DateFormatter('%b-%d')
+ax.xaxis.set_major_formatter(myFmt)  # https://stackoverflow.com/questions/14946371/editing-the-date-formatting-of-x-axis-tick-labels-in-matplotlib
+ax.xaxis.set_major_locator(ticker.MultipleLocator(10))  # https://stackoverflow.com/questions/54057567/matplotlib-uneven-intervals-between-x-axis-with-datetime
+## Rotate date labels automatically
+fig.autofmt_xdate()
+
+plt.title('AQI in Milan, Nov/Dec 2013')
+
+fig.savefig('.\\Smart_Cities\\_viz\\___AQI_grey.png')
+plt.clf()
+plt.cla()
+plt.close()
 
 
 
@@ -135,26 +150,28 @@ plt.cla()
 plt.close()
 
 
-## plot all together todo (colors are shit, save it)
-for w in weather.columns:
-    mean = weather[w].mean()
-    sd = weather[w].std()
-    norm = pd.DataFrame((weather[w]-mean)/sd, columns=[w], index=data.index)
-    plt.plot(data.index, w, data=norm, label=w)
-plt.title('Normalized Weather Variables')
-plt.show()
-
-plt.clf()
-plt.cla()
-plt.close()
 
 
-### scatter of correlated values todo color, maybe uncorrelated?
-verycorrelated = .85
+### scatter of correlated values
+verycorrelated = .9
 
 for i in range(len(weather.corr().columns)):
     for j in range(i+1, len(weather.corr().columns)):
-        if weather.corr().iloc[i,j] > verycorrelated:
+        if abs(weather.corr().iloc[i,j]) > verycorrelated:
+            corr = round(weather.corr().iloc[i, j], 2)
+            plt.scatter(weather.columns[i], weather.columns[j], data= weather, color='lightgreen')
+            plt.title(weather.columns[i] +' vs. ' +weather.columns[j] + ', corr: '+ str(corr))
+            plt.savefig('.\\Smart_Cities\\_viz\\_____'+ weather.columns[i] +'v' +weather.columns[j]  +'.png')
+            plt.clf()
+            plt.cla()
+            plt.close()
+
+### scatter of correlated values
+notverycorrelated = .1
+
+for i in range(len(weather.corr().columns)):
+    for j in range(i+1, len(weather.corr().columns)):
+        if abs(weather.corr().iloc[i,j]) < notverycorrelated:
             corr = round(weather.corr().iloc[i, j], 2)
             plt.scatter(weather.columns[i], weather.columns[j], data= weather, color='lightgreen')
             plt.title(weather.columns[i] +' vs. ' +weather.columns[j] + ', corr: '+ str(corr))
@@ -185,26 +202,28 @@ plt.cla()
 plt.close()
 
 
-## plot all together todo (colors are shit, needs save, binary vars)
-for t in traffic.columns:
-    mean = traffic[t].mean()
-    sd = traffic[t].std()
-    norm = pd.DataFrame((traffic[t]-mean)/sd, columns=[t], index=data.index)
-    plt.plot(data.index, t, data=norm, label=t)
-plt.title('Normalized Traffic Variables')
-plt.show()
-
-plt.clf()
-plt.cla()
-plt.close()
-
-
 ### scatter of correlated values (these are all very correlated!
-verycorrelated = .85
+verycorrelated = .9
 
 for i in range(len(traffic.corr().columns)):
     for j in range(i+1, len(traffic.corr().columns)):
-        if traffic.corr().iloc[i,j] > verycorrelated:
+        if abs(traffic.corr().iloc[i,j]) > verycorrelated:
+            corr = round(traffic.corr().iloc[i, j], 2)
+            plt.scatter(traffic.columns[i], traffic.columns[j], data= traffic, color='lightgreen')
+            plt.title(traffic.columns[i] +' vs. ' +traffic.columns[j] + ', corr: '+ str(corr))
+            plt.savefig('.\\Smart_Cities\\_viz\\_____'+ traffic.columns[i] +'v' +traffic.columns[j]  +'.png')
+            plt.clf()
+            plt.cla()
+            plt.close()
+
+
+
+### scatter of correlated values (these are all very correlated!
+notverycorrelated = .1
+
+for i in range(len(traffic.corr().columns)):
+    for j in range(i+1, len(traffic.corr().columns)):
+        if abs(traffic.corr().iloc[i,j]) < notverycorrelated:
             corr = round(traffic.corr().iloc[i, j], 2)
             plt.scatter(traffic.columns[i], traffic.columns[j], data= traffic, color='lightgreen')
             plt.title(traffic.columns[i] +' vs. ' +traffic.columns[j] + ', corr: '+ str(corr))
@@ -236,26 +255,13 @@ plt.clf()
 plt.cla()
 plt.close()
 
-## plot all together todo (colors are shit, needs save, binary vars)
-for t in pollutant.columns:
-    mean = pollutant[t].mean()
-    sd = pollutant[t].std()
-    norm = pd.DataFrame((pollutant[t]-mean)/sd, columns=[t], index=data.index)
-    plt.plot(data.index, t, data=norm, label=t)
-plt.title('Normalized Pollutant Variables')
-plt.show()
-
-plt.clf()
-plt.cla()
-plt.close()
-
 
 ### scatter of correlated values todo probably need to remove components of AQI
-verycorrelated = .85
+verycorrelated = .9
 
 for i in range(len(pollutant.corr().columns)):
     for j in range(i+1, len(pollutant.corr().columns)):
-        if pollutant.corr().iloc[i,j] > verycorrelated:
+        if abs(pollutant.corr().iloc[i,j]) > verycorrelated:
             corr = round(pollutant.corr().iloc[i, j], 2)
             plt.scatter(pollutant.columns[i], pollutant.columns[j], data= pollutant, color='lightgreen')
             plt.title(pollutant.columns[i] +' vs. ' + pollutant.columns[j] + ', corr: '+ str(corr))
@@ -263,6 +269,22 @@ for i in range(len(pollutant.corr().columns)):
             plt.clf()
             plt.cla()
             plt.close()
+
+
+### scatter of correlated values todo probably need to remove components of AQI
+notverycorrelated = .1
+
+for i in range(len(pollutant.corr().columns)):
+    for j in range(i+1, len(pollutant.corr().columns)):
+        if abs(pollutant.corr().iloc[i,j]) < notverycorrelated:
+            corr = round(pollutant.corr().iloc[i, j], 2)
+            plt.scatter(pollutant.columns[i], pollutant.columns[j], data= pollutant, color='lightgreen')
+            plt.title(pollutant.columns[i] +' vs. ' + pollutant.columns[j] + ', corr: '+ str(corr))
+            plt.savefig('.\\Smart_Cities\\_viz\\_____'+ pollutant.columns[i] +'v' + pollutant.columns[j]  +'.png')
+            plt.clf()
+            plt.cla()
+            plt.close()
+
 
 # across all
 all_hm = sb.heatmap(feat_raw.corr(),

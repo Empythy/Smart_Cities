@@ -4,16 +4,19 @@
 ######## potential regressions
 # todo next
 #   NN
-#   subset selection
-#   rerun this file with subset
-#   validation
+#   1 subset selection-least correlated, lasso, most correlated w target, stepwise selection
 #   use raw
-#   predict components
+#   predict componentsù
+#   stratify train and test to balance the test set, bin variables because sklearn only does it by class
+#      https://stackoverflow.com/questions/34842405/parameter-stratify-from-method-train-test-split-scikit-learn
+#   get MSE on AQI
 
 
 
 import numpy as np
 import seaborn as sb
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdat
 import matplotlib.ticker as ticker
@@ -59,6 +62,7 @@ fsm_cols = ['sm_Relative H',  'sm_Precipitat', 'sm_Wind Speed', 'sm_Atmospheri',
 
 fsm = pd.DataFrame(index=data.index)
 
+
 for i in fsm_cols:
     fsm[str(i)] = data[str(i)]
 
@@ -83,33 +87,99 @@ for i in fraw_cols:
 ################# Use smoothed data
 x = fsm
 
-#Train, test, validation splits
+#Train, test splits
 train_pct = .70
-valid_set_start = train_pct + ((1-train_pct)/2)
 
 train_stop_idx = int(len(data)*train_pct - 12)
 test_start_idx = train_stop_idx+12 #accounts for 24h influence on AQI
-valid_start_idx = int(len(data)*valid_set_start)
 
 xTrain = x.iloc[:train_stop_idx,:]
-xTest = x.iloc[test_start_idx:,:] # pulled out stop at valid_start_idx
-xValid = x.iloc[valid_start_idx:,:]
+xTest = x.iloc[test_start_idx:,:]
 
 yTrain = reg_y.iloc[:train_stop_idx]
 yTrain_class = class_y.iloc[:train_stop_idx]
 
-yTest = reg_y.iloc[test_start_idx:valid_start_idx]
-yTest_class = class_y.iloc[test_start_idx: ]# pulled out stop at valid_start_idx
-
-yValid = reg_y.iloc[valid_start_idx:]
-yValid_class = class_y.iloc[valid_start_idx:]
-yValid_class
+yTest = reg_y.iloc[test_start_idx:]
+yTest_class = class_y.iloc[test_start_idx: ]
 
 
-#THis is an issue - todo only 4 values in test set, 3 in valid with 0.8
-class_y.nunique()
-yTest_class.nunique()
-yValid_class.nunique()
+# distribution of classes in train vs test
+Train_dist = {}
+for i in yTrain_class.unique():
+    Train_dist[i] = 0
+for i in yTrain_class:
+    Train_dist[i] += 1
+
+# plot dictionary
+fig, ax = plt.subplots()
+plt.bar(*zip(*Train_dist.items()), color='lightgreen')  #https://stackoverflow.com/questions/16010869/plot-a-bar-using-matplotlib-using-a-dictionary
+plt.title('Distribution of Training Set Classes')
+fig.savefig('.\\Smart_Cities\\_viz\\_Train_Distribution.png')
+plt.clf()
+plt.cla()
+plt.close()
+
+Test_dist = {}
+for i in yTrain_class.unique():  #use train to get the same order
+    Test_dist[i] = 0
+for i in yTest_class:
+    Test_dist[i] += 1
+
+# plot dictionary
+fig, ax = plt.subplots()
+plt.bar(*zip(*Test_dist.items()), color='lightgreen')  #https://stackoverflow.com/questions/16010869/plot-a-bar-using-matplotlib-using-a-dictionary
+plt.title('Distribution of Testing Set Classes')
+fig.savefig('.\\Smart_Cities\\_viz\\_Test_Distribution.png')
+plt.clf()
+plt.cla()
+plt.close()
+
+All_dist = {}
+for i in yTrain_class.unique():  #use train to get the same order
+    All_dist[i] = 0
+for i in class_y:
+    All_dist[i] += 1
+
+# plot dictionary
+fig, ax = plt.subplots()
+plt.bar(*zip(*All_dist.items()), color='lightgreen')  #https://stackoverflow.com/questions/16010869/plot-a-bar-using-matplotlib-using-a-dictionary
+plt.title('Distribution of AQI Classes')
+fig.savefig('.\\Smart_Cities\\_viz\\_All_Distribution.png')
+plt.clf()
+plt.cla()
+plt.close()
+
+
+
+#Plot of test set of AQI
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots()
+ax.plot(yTest.index, yTest, color='darkgreen')
+
+ax.xaxis_date()
+
+myFmt = mdat.DateFormatter('%b-%d')
+ax.xaxis.set_major_formatter(myFmt)  # https://stackoverflow.com/questions/14946371/editing-the-date-formatting-of-x-axis-tick-labels-in-matplotlib
+ax.xaxis.set_major_locator(ticker.MultipleLocator(4))  # https://stackoverflow.com/questions/54057567/matplotlib-uneven-intervals-between-x-axis-with-datetime
+## Rotate date labels automatically
+fig.autofmt_xdate()
+
+plt.title('AQI Test Set')
+
+fig.savefig('.\\Smart_Cities\\_viz\\___AQI_test.png')
+plt.clf()
+plt.cla()
+plt.close()
+
+
+
+
+
+
+
+
+
+
 
 # first get accuracy for picking the most frequent in test and applying to train
 Train_most_common_class = yTrain_class.value_counts().idxmax()
@@ -143,6 +213,7 @@ SLR_Class = Sing_LR.copy()
 for i in SLR_Class.columns:
     SLR_Class[i] = pd.cut(SLR_Class[i], bins=cutoffs, labels=labels)
 
+SLR_Class.to_csv('.\\Smart_Cities\\_viz\\SLR_Classes.csv')
 
 #get accuracy stats for baseline LR
 SLR_acc = pd.DataFrame(index=SLR_Class.columns, columns=['Accuracy'])
@@ -192,8 +263,8 @@ MLR_Class = Mult_LR.copy()
 for i in MLR_Class.columns:
     MLR_Class[i] = pd.cut(MLR_Class[i], bins=cutoffs, labels=labels)
 
-MLR_Class.head(15)
-yTest_class.head(15)
+MLR_Class.to_csv('.\\Smart_Cities\\_viz\\MLR_Classes.csv')
+yTest_class.to_csv('.\\Smart_Cities\\_viz\\Test_Classes.csv')
 
 #get accuracy stats
 MLR_acc = pd.DataFrame(index=MLR_Class.columns, columns=['Accuracy'])
@@ -261,6 +332,8 @@ gboostmodel = ensemble.GradientBoostingClassifier().fit(X=xTrain, y = yTrain_cla
 predGRAD = gboostmodel.predict(np.array(xTest))
 colname = 'GDT_BST'
 SVM_DT[colname]= predGRAD
+
+SVM_DT.to_csv('.\\Smart_Cities\\_viz\\SVM_DT_Classes.csv')
 
 # get accuracy stats
 SVM_DT_acc = pd.DataFrame(index=SVM_DT.columns, columns=['Accuracy'])
