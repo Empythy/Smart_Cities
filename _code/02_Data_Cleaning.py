@@ -16,7 +16,7 @@ import missingpy as mp
 import numpy as np
 import datetime as dt
 import os
-os.chdir('C:\\Users\\Dan\\PycharmProjects\\Smart_Cities')
+os.chdir('C:\\Users\\Dan Herweg\\Pycharm_Projects\\Smart_Cities')
 gc.collect()
 
 #grab all files from aggregation

@@ -77,7 +77,7 @@ Ozone_8h = []
 
 for i in range(len(data.sm_Ozon)):
     try:
-        MA_8h = data.Ozon[i-8:i].mean()
+        MA_8h = data.sm_Ozon[i-8:i].mean()
         Ozone_8h.append(MA_8h)
     except:
         Ozone_8h.append(np.nan)
@@ -89,13 +89,8 @@ data['O3_8h_MA'] = Ozone_8h
 
 
 
-data.columns
 for i in range(len(data.sm_PM10)):
-    try:
-        MA_8h = data.PM10[i-24:i].mean()
-        PM10_24h.append(MA_8h)
-    except:
-        PM10_24h.append(np.nan)
+    PM10_24h.append(data.sm_PM10[i])
 
 
 PM10_24h = [x/ref_PM10 for x in PM10_24h]
@@ -124,7 +119,4 @@ data = data.iloc[24:,]
 
 data.isnull().sum().sum()
 file = data.to_csv('.\\Smart_Cities\\_csv\\03_Features_Targets.csv')
-
-
-
 

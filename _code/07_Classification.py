@@ -1,7 +1,3 @@
-
-################ CHECK FOR APPROPRIATENESS OF DUMMY/CONTINUOUS
-
-######## potential regressions
 # todo next
 #   NN
 #   1 subset selection-least correlated, lasso, most correlated w target, stepwise selection
@@ -69,38 +65,41 @@ for i in fsm_cols:
 reg_y = data.AQI
 class_y = data.AQI_C
 
-# show raw data with imputed values
-fraw_cols= ['Relative H', 'Precipitat', 'Wind Speed', 'Atmospheri', 'Net Radiat', 'Wind Direc', 'Global Rad', 'Temperatur',
-            'traffic',
-            '0-15m', '15-30m', '30-45m', '45-60m',
-            'EURO_3', 'EURO_2', 'EURO_4', 'EURO_5', 'EURO_1', 'EURO_6', 'EURO_7',
-            'VType_4', 'VType_3', 'VType_1', 'VType_2',
-            'FType_1', 'FType_2', 'FType_4', 'FType_5', 'FType_3',
-            'DPF_2', 'DPF_1',
-            'small_len', 'med_len',
-            'weekend', 'morning', 'mid_day', 'evening']
 
-fraw = pd.DataFrame(index=data.index)
-for i in fraw_cols:
-    fraw[str(i)] = data[str(i)]
+#stratified Train, test splits
 
-################# Use smoothed data
-x = fsm
+from sklearn.model_selection import StratifiedShuffleSplit
 
-#Train, test splits
-train_pct = .70
 
-train_stop_idx = int(len(data)*train_pct - 12)
-test_start_idx = train_stop_idx+12 #accounts for 24h influence on AQI
+#drop timestamp index bc it messes up strat shuffle split
+data_i = data.copy()
+data_i.reset_index(inplace=True)
+data_i.drop(columns="timestamp", inplace=True)
+fsm.reset_index(inplace=True)
+fsm.drop(columns="timestamp", inplace=True)
+AQI_strats = pd.DataFrame(data.AQI)
+AQI_strats.reset_index(inplace=True)
+AQI_strats.drop(columns="timestamp", inplace=True)
 
-xTrain = x.iloc[:train_stop_idx,:]
-xTest = x.iloc[test_start_idx:,:]
+labels = [1,2,3,4,5]
 
-yTrain = reg_y.iloc[:train_stop_idx]
-yTrain_class = class_y.iloc[:train_stop_idx]
+AQI_strats["strat"] = pd.qcut(x=AQI_strats.AQI, q=5, labels=labels)
 
-yTest = reg_y.iloc[test_start_idx:]
-yTest_class = class_y.iloc[test_start_idx: ]
+train_pct = .80
+
+#https://blog.usejournal.com/creating-an-unbiased-test-set-for-your-model-using-stratified-sampling-technique-672b778022d5
+split = StratifiedShuffleSplit(test_size=(1-train_pct), random_state=5)
+
+for train_idx, test_idx in split.split(AQI_strats, AQI_strats["strat"]):
+    y_train = data_i.AQI.loc[train_idx]
+    y_test = data_i.AQI.loc[test_idx]
+    x_train = fsm.loc[train_idx]
+    x_test = fsm.loc[test_idx]
+
+
+from sklearn.metrics import mean_squared_error
+
+MLR_MSE = pd.DataFrame()
 
 
 # distribution of classes in train vs test

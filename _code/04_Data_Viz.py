@@ -9,19 +9,19 @@ import seaborn as sb
 
 os.chdir(os.getcwd())
 # os.chdir('C:\\Users\\Dan Herweg\\PycharmProjects\\Smart_Cities')
-
+plt.style.use('seaborn-darkgrid')
 
 data = pd.read_csv('.\\Smart_Cities\\_csv\\03_Features_Targets.csv')
 data.set_index('timestamp', inplace=True)
 data.index = pd.to_datetime(data.index)
-# type(data.index)
+
 
 #viz of AQI
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots()
+ax.xaxis_date()
 ax.plot(data.index, data['AQI'], color='darkgreen')
 
-ax.xaxis_date()
 
 myFmt = mdat.DateFormatter('%b-%d')
 ax.xaxis.set_major_formatter(myFmt)  # https://stackoverflow.com/questions/14946371/editing-the-date-formatting-of-x-axis-tick-labels-in-matplotlib
