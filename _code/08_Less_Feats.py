@@ -1,16 +1,11 @@
 # rerunning the model using the following selected features
 
 features = ['sm_Atmospheri',
-'sm_Wind Speed',
-'sm_Temperatur',
-'sm_Relative H',
-'sm_traffic',
-'sm_Precipitat',
-'sm_Wind Direc',
-'sm_Net Radiat',
-'sm_Global Rad',
-'small_len',
-'weekend']
+            'sm_Wind Speed',
+            'sm_Temperatur',
+            'sm_Relative H',
+            'sm_traffic',
+            'weekend']
 
 import numpy as np
 import seaborn as sb
@@ -123,11 +118,12 @@ labels = ['Good','Acceptable', 'Mediocre', 'Poor', 'Bad']
 y_true = pd.cut(y_test, bins=cutoffs, labels=labels)
 y_train_class = pd.cut(y_train, bins=cutoffs, labels=labels)
 
+
 MLR_Class = MLR.copy()
 for i in MLR_Class.columns:
     MLR_Class[i] = pd.cut(MLR_Class[i], bins=cutoffs, labels=labels)
 
-MLR_Class.to_csv('.\\Smart_Cities\\_viz\\MLR_Classes2.csv')
+MLR_Class.to_csv('.\\Smart_Cities\\_viz\\MLR_Classes3.csv')
 
 MLR_Class
 
@@ -204,4 +200,6 @@ Class_ACC[colname] = [gboostmodel.score(X=x_test, y=y_true)]
 
 SVM_DT.to_csv('.\\Smart_Cities\\_viz\\SVM_DT_Classes.csv')
 Class_ACC.transpose()
+
+
 
