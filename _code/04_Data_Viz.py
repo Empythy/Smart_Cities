@@ -81,12 +81,9 @@ feat_raw.head()
 
 for i in range(len(feat_raw.columns)):
     fig, ax = plt.subplots(nrows=1, ncols=2)
-    # mean = str(round(feat_raw.iloc[:,i].mean(),2))
-    # sd = str(round(feat_raw.iloc[:,i].std(),2))
-    # plt.title(str(feat_raw.columns[i])+', mean: '+mean+' sd: '+sd)
 
-    ax[0].plot(feat_raw.index, feat_raw.iloc[:,i], color='darkgreen', linewidth = 1)
-    ax[0].set_title(feat_raw.columns[i]+'Over Time')
+    ax[0].plot(feat_raw.index, feat_raw.iloc[:,i], color='darkgreen', linewidth = .5)
+    ax[0].set_title(feat_raw.columns[i]+' Over Time')
     ax[0].locator_params(bins=4)
 
     myFmt = mdat.DateFormatter('%b-%d')
@@ -112,8 +109,8 @@ for i in data.columns:
         noisy_name = i[3:]
 
         fig, ax = plt.subplots()
-        ax.plot(data.index, noisy_name, data=data, color='palegreen', linewidth = 1)
-        ax.plot(data.index, str(i), data=data, color='darkgreen', linewidth = 2)
+        ax.plot(data.index, noisy_name, data=data, color='palegreen', linewidth = .5)
+        ax.plot(data.index, str(i), data=data, color='darkgreen', linewidth = .5)
         ax.xaxis_date()
 
         myFmt = mdat.DateFormatter('%b-%d')
@@ -272,7 +269,7 @@ for i in range(len(pollutant.corr().columns)):
 
 
 ### scatter of correlated values todo probably need to remove components of AQI
-notverycorrelated = .1
+notverycorrelated = .2
 
 for i in range(len(pollutant.corr().columns)):
     for j in range(i+1, len(pollutant.corr().columns)):
@@ -301,5 +298,14 @@ plt.clf()
 plt.cla()
 plt.close()
 
+# Make histogram of AQI classes
+data.AQI_C.value_counts().plot(kind='bar', color='lightgreen')
+plt.title('AQI Categorical Distribution')
+plt.tight_layout()
+plt.savefig('.\\Smart_Cities\\_viz\\__AQI_Categorical_DIST.png')
 
+plt.show()
 
+plt.clf()
+plt.cla()
+plt.close()

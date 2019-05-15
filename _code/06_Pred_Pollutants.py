@@ -176,3 +176,5 @@ total = len(test_idx)
 acc = acc/total
 acc
 
+mse = mean_squared_error(y_true=data.AQI.iloc[test_idx], y_pred=AQI_calc.AQI)
+mse

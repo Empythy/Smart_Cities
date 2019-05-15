@@ -14,7 +14,7 @@ from sklearn import svm
 
 os.chdir(os.getcwd())
 # os.chdir('C:\\Users\\Dan Herweg\\PycharmProjects\\Smart_Cities')
-
+plt.style.use('seaborn-darkgrid')
 
 data = pd.read_csv('.\\Smart_Cities\\_csv\\03_Features_Targets.csv', index_col=0)
 # data.set_index('timestamp', inplace=True)
@@ -102,8 +102,32 @@ plt.close()
 # distribution of continuous variable in train vs test
 fig, ax = plt.subplots()
 plt.hist(y_test, color='lightgreen', bins=15)
-plt.title('Distribution of Training Set AQI')
+plt.title('Distribution of Testing Set AQI')
 fig.savefig('.\\Smart_Cities\\_viz\\_Test_Distribution_continuous.png')
+plt.clf()
+plt.cla()
+plt.close()
+
+# Distribution of train AQI classes
+class_y[train_idx].value_counts().plot(kind='bar', color='lightgreen')
+plt.title('Training Set AQI Categorical Distribution')
+plt.tight_layout()
+plt.savefig('.\\Smart_Cities\\_viz\\__TRAIN_AQI_Categorical_DIST.png')
+
+plt.show()
+
+plt.clf()
+plt.cla()
+plt.close()
+
+# Distribution of test AQI classes
+class_y[test_idx].value_counts().plot(kind='bar', color='lightgreen')
+plt.title('Testing Set AQI Categorical Distribution')
+plt.tight_layout()
+plt.savefig('.\\Smart_Cities\\_viz\\__TEST_AQI_Categorical_DIST.png')
+
+plt.show()
+
 plt.clf()
 plt.cla()
 plt.close()
@@ -134,7 +158,29 @@ SLR_MSE = pd.DataFrame()
 for i in Sing_LR.columns:
     colname = i +'_MSE'
     SLR_MSE[colname] = [mean_squared_error(y_true=y_test, y_pred=Sing_LR[i])]
-SLR_MSE.transpose()
+SLR_MSE = SLR_MSE.transpose()
+SLR_MSE.columns = ["MSE"]
+SLR_MSE.sort_values(by=["MSE"], ascending=True, inplace=True, axis=0)
+SLR_MSE_bar = SLR_MSE[:10]
+
+newcols = []
+for i in SLR_MSE_bar.index:
+    if i[4:7] == "sm_":
+        newcols.append(i[7:11])
+    else:
+        newcols.append(i[4:11])
+newcols
+SLR_MSE_bar.index = newcols
+
+plt.bar(SLR_MSE_bar.index, SLR_MSE_bar.MSE, color = 'lightgreen')
+plt.title('Single Linear Regression MSEs')
+plt.ylim(0,6000)
+plt.savefig('.\\Smart_Cities\\_viz\\__SLR_MSE.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
+
 
 # make regressions into classifications
 cutoffs = [-1,50,100,150,200,np.inf]
@@ -158,6 +204,7 @@ import statistics
 naive_class = statistics.mode(y_train_class)
 y_true.value_counts()[naive_class]/len(y_true)
 
+
 #get accuracy stats for SLR
 SLR_ACC = pd.DataFrame()
 for col in SLR_Class.columns:
@@ -170,6 +217,28 @@ for col in SLR_Class.columns:
     SLR_ACC[col]=[acc]
 
 SLR_ACC.transpose()
+SLR_ACC = SLR_ACC.transpose()
+SLR_ACC.columns = ["Accuracy"]
+SLR_ACC.sort_values(by=["Accuracy"], ascending=False, inplace=True, axis=0)
+SLR_ACC_bar = SLR_ACC[:10]
+
+newcols = []
+for i in SLR_ACC_bar.index:
+    if i[4:7] == "sm_":
+        newcols.append(i[7:11])
+    else:
+        newcols.append(i[4:11])
+newcols
+SLR_ACC_bar.index = newcols
+
+plt.bar(SLR_ACC_bar.index, SLR_ACC_bar.Accuracy, color = 'lightgreen')
+plt.title('Single Linear Regression Accuracy')
+plt.ylim(0,1)
+plt.savefig('.\\Smart_Cities\\_viz\\__SLR_ACC.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
 
 
 
@@ -209,7 +278,30 @@ MLR_MSE[colname] = [mean_squared_error(y_true=y_test, y_pred=predictMLR)]
 elastic_coeff = reg.coef_
 
 MLR.head()
+MLR_MSE['MLR_Poll->AQI'] = [2232.0298544834363] #from file 06
+MLR_MSE = MLR_MSE.transpose()
+MLR_MSE.columns = ["MSE"]
+MLR_MSE.sort_values(by=["MSE"], ascending=True, inplace=True, axis=0)
+MLR_MSE_bar = MLR_MSE
+
+newcols = []
+for i in MLR_MSE_bar.index:
+    if len(i) > 12:
+        newcols.append(i[4:13])
+    else:
+        newcols.append(i[4:])
+newcols
+MLR_MSE_bar.index = newcols
 MLR_MSE
+plt.bar(MLR_MSE_bar.index, MLR_MSE_bar.MSE, color = 'lightgreen')
+plt.title('Multiple Linear Regression MSEs')
+plt.ylim(0,6000)
+plt.savefig('.\\Smart_Cities\\_viz\\__MLR_MSE.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
+
 # Make classes (are teh regression models superfluous if we can just use classificantion versions?)
 MLR_Class = MLR.copy()
 for i in MLR_Class.columns:
@@ -228,7 +320,31 @@ for col in MLR_Class.columns:
     acc = acc/total
     MLR_ACC[col]=[acc]
 
+MLR_ACC['MLR_Poll->AQI'] = 0.4722222222222222
 MLR_ACC.transpose()
+
+MLR_ACC = MLR_ACC.transpose()
+MLR_ACC.columns = ["Accuracy"]
+MLR_ACC.sort_values(by=["Accuracy"], ascending=False, inplace=True, axis=0)
+MLR_ACC_bar = MLR_ACC
+newcols = []
+for i in MLR_ACC_bar.index:
+    if len(i) > 12:
+        newcols.append(i[4:13])
+    else:
+        newcols.append(i[4:])
+newcols
+MLR_ACC_bar.index = newcols
+MLR_ACC_bar
+
+plt.bar(MLR_ACC_bar.index, MLR_ACC_bar.Accuracy, color = 'lightgreen')
+plt.title('Multiple Linear Regression Accuracy')
+plt.ylim(0 , 1)
+plt.savefig('.\\Smart_Cities\\_viz\\__MLR_ACC.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
 
 
 ########## CLASSIFICATION
@@ -273,7 +389,6 @@ predBAG = bagmodel.predict(np.array(x_test))
 colname = 'BAG'
 SVM_DT[colname]= predBAG
 Class_ACC[colname] = [bagmodel.score(X=x_test, y=y_true)]
-bagmodel.decision_function(x_test)
 
 
 # Boosting
@@ -291,6 +406,20 @@ Class_ACC[colname] = [gboostmodel.score(X=x_test, y=y_true)]
 
 SVM_DT.to_csv('.\\Smart_Cities\\_viz\\SVM_DT_Classes.csv')
 Class_ACC.transpose()
+Class_ACC = Class_ACC.transpose()
+Class_ACC.columns = ["Accuracy"]
+Class_ACC.sort_values(by=["Accuracy"], ascending=False, inplace=True, axis=0)
+Class_ACC_bar = Class_ACC
+Class_ACC_bar
+
+plt.bar(Class_ACC_bar.index, Class_ACC_bar.Accuracy, color = 'lightgreen')
+plt.title('Classification Algorithm Accuracy')
+plt.ylim(0 , 1)
+plt.savefig('.\\Smart_Cities\\_viz\\__Class_ACC.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
 
 # Feature Selection
 FS = pd.DataFrame(columns=['MLR_C', 'Ridge_C', 'Lasso_C', 'Elastic_C', 'RF_Feature_Importance'])
@@ -303,7 +432,39 @@ FS['Lasso_C'] = lasso_coeff
 FS['RF_Feature_Importance']=RF_features
 FS['Feature_Name'] = fsm_cols
 FS.to_csv('.\\Smart_Cities\\_viz\\Features.csv')
-FS
+
+RF_FI = pd.DataFrame(index=fsm_cols)
+RF_FI['Feature Importance'] = RF_features
+RF_FI.sort_values(by='Feature Importance', ascending=False,  inplace=True)
+RF_FI = RF_FI[:10]
+RF_FI.sort_values(by='Feature Importance', ascending=True,  inplace=True)
+
+#plot RF FI
+plt.barh(RF_FI.index, RF_FI['Feature Importance'], color = 'lightgreen')
+plt.title('Random Forest Feature Importance')
+plt.savefig('.\\Smart_Cities\\_viz\\__RF_FI.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
+
+#Plot Lasso absolute coefficients
+LASSO_C = pd.DataFrame(index=fsm_cols)
+LASSO_C['Absolute Coefficient'] = abs(lasso_coeff)
+LASSO_C.sort_values(by='Absolute Coefficient', ascending=False,  inplace=True)
+LASSO_C = LASSO_C[:10]
+LASSO_C.sort_values(by='Absolute Coefficient', ascending=True,  inplace=True)
+LASSO_C
+
+#plot Lasso Coeff
+plt.barh(LASSO_C.index, LASSO_C['Absolute Coefficient'], color = 'lightgreen')
+plt.title('Lasso Absolute Coefficient')
+plt.savefig('.\\Smart_Cities\\_viz\\__LASSO_C.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
+
 
 # # 10 most iportant features for RF
 # sm_Atmospheri

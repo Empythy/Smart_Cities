@@ -4,8 +4,8 @@ features = ['sm_Atmospheri',
             'sm_Wind Speed',
             'sm_Temperatur',
             'sm_Relative H',
-            'sm_traffic',
-            'weekend']
+            'sm_traffic']#,
+            # 'weekend']
 
 import numpy as np
 import seaborn as sb
@@ -19,11 +19,13 @@ import os
 from sklearn import linear_model
 from sklearn import ensemble
 from sklearn import svm
+import numpy as np
+import seaborn as sns
 
 
 os.chdir(os.getcwd())
 # os.chdir('C:\\Users\\Dan Herweg\\PycharmProjects\\Smart_Cities')
-
+plt.style.use('seaborn-darkgrid')
 
 data = pd.read_csv('.\\Smart_Cities\\_csv\\03_Features_Targets.csv', index_col=0)
 # data.set_index('timestamp', inplace=True)
@@ -118,7 +120,6 @@ labels = ['Good','Acceptable', 'Mediocre', 'Poor', 'Bad']
 y_true = pd.cut(y_test, bins=cutoffs, labels=labels)
 y_train_class = pd.cut(y_train, bins=cutoffs, labels=labels)
 
-
 MLR_Class = MLR.copy()
 for i in MLR_Class.columns:
     MLR_Class[i] = pd.cut(MLR_Class[i], bins=cutoffs, labels=labels)
@@ -198,8 +199,95 @@ colname = 'GDT_BST'
 SVM_DT[colname]= predGRAD
 Class_ACC[colname] = [gboostmodel.score(X=x_test, y=y_true)]
 
-SVM_DT.to_csv('.\\Smart_Cities\\_viz\\SVM_DT_Classes.csv')
+SVM_DT.to_csv('.\\Smart_Cities\\_viz\\SVM_DT_Classes3.csv')
 Class_ACC.transpose()
+
+MLR_ACC= MLR_ACC.transpose()
+Class_ACC = Class_ACC.transpose()
+
+Class_ACC.columns = ["Accuracy"]
+MLR_ACC.columns = ["Accuracy"]
+
+Class_ACC=Class_ACC.append(MLR_ACC)
+Class_ACC
+Class_ACC.sort_values(by=["Accuracy"], ascending=False, inplace=True, axis=0)
+
+Class_ACC_bar = Class_ACC
+newcols = []
+for i in Class_ACC_bar.index:
+    if i[:4]=='MLR_':
+        newcols.append(i[4:])
+    else:
+        newcols.append(i)
+Class_ACC_bar.index = newcols
+
+plt.bar(Class_ACC_bar.index, Class_ACC_bar.Accuracy, color = 'lightgreen')
+plt.title('Accuracy with 5 Features')
+plt.ylim(0 , 1)
+plt.savefig('.\\Smart_Cities\\_viz\\__Fless_ACC.png')
+plt.show()
+plt.clf()
+plt.cla()
+
+RF_FI = pd.DataFrame(index=features)
+RF_FI['Feature Importance'] = RF_features
+RF_FI.sort_values(by='Feature Importance', ascending=True,  inplace=True)
+
+#plot RF FI
+plt.barh(RF_FI.index, RF_FI['Feature Importance'], color = 'lightgreen')
+plt.title('Random Forest Feature Importance, Final Model')
+plt.savefig('.\\Smart_Cities\\_viz\\__RF_FI2.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
+
+# class matrix of final models, bagging first
+class_list = ['Good','Acceptable',  'Mediocre', 'Poor', 'Bad']
+bag_cmatrix = np.zeros(shape=(len(class_list),len(class_list)), dtype='int')
+c_bag = pd.DataFrame(bag_cmatrix, index=class_list, columns=class_list)
+
+y_true_no_idx = y_true.reset_index()
+y_true_no_idx.drop(['index'], inplace=True, axis=1)
+y_true_no_idx.loc[0]
+
+for i in range(len(y_true)):
+    actual = y_true_no_idx.loc[i]
+    guess = predBAG[i]
+    c_bag.loc[actual,guess] +=1
+c_bag
+
+
+sns.heatmap(c_bag, annot=True, cmap='Greens', fmt='g')
+plt.title('Bagging Classifier Confusion Matrix')
+plt.ylabel('Predicted')
+plt.xlabel('Actual')
+plt.savefig('.\\Smart_Cities\\_viz\\__BAG_Confusion.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
+
+
+
+rf_cmatrix = np.zeros(shape=(len(class_list),len(class_list)), dtype='int')
+c_rf = pd.DataFrame(rf_cmatrix, index=class_list, columns=class_list)
+
+for i in range(len(y_true)):
+    actual = y_true_no_idx.loc[i]
+    guess = predRF[i]
+    c_rf.loc[actual,guess] +=1
+c_rf
+
+sns.heatmap(c_rf, annot=True, cmap='Greens', fmt='g')
+plt.title('Random Forest Confusion Matrix')
+plt.ylabel('Predicted')
+plt.xlabel('Actual')
+plt.savefig('.\\Smart_Cities\\_viz\\__RF_Confusion.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
 
 
 

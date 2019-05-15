@@ -8,8 +8,7 @@ features = ['sm_Atmospheri',
 'sm_Precipitat',
 'sm_Wind Direc',
 'sm_Net Radiat',
-'sm_Global Rad',
-'small_len',
+'FType_5',
 'weekend']
 
 import numpy as np
@@ -28,7 +27,7 @@ from sklearn import svm
 
 os.chdir(os.getcwd())
 # os.chdir('C:\\Users\\Dan Herweg\\PycharmProjects\\Smart_Cities')
-
+plt.style.use('seaborn-darkgrid')
 
 data = pd.read_csv('.\\Smart_Cities\\_csv\\03_Features_Targets.csv', index_col=0)
 # data.set_index('timestamp', inplace=True)
@@ -202,6 +201,47 @@ colname = 'GDT_BST'
 SVM_DT[colname]= predGRAD
 Class_ACC[colname] = [gboostmodel.score(X=x_test, y=y_true)]
 
-SVM_DT.to_csv('.\\Smart_Cities\\_viz\\SVM_DT_Classes.csv')
+SVM_DT.to_csv('.\\Smart_Cities\\_viz\\SVM_DT_Classes2.csv')
 Class_ACC.transpose()
 
+MLR_ACC= MLR_ACC.transpose()
+Class_ACC = Class_ACC.transpose()
+
+Class_ACC.columns = ["Accuracy"]
+MLR_ACC.columns = ["Accuracy"]
+
+Class_ACC=Class_ACC.append(MLR_ACC)
+Class_ACC
+Class_ACC.sort_values(by=["Accuracy"], ascending=False, inplace=True, axis=0)
+
+Class_ACC_bar = Class_ACC
+newcols = []
+for i in Class_ACC_bar.index:
+    if i[:4]=='MLR_':
+        newcols.append(i[4:])
+    else:
+        newcols.append(i)
+Class_ACC_bar.index = newcols
+
+plt.bar(Class_ACC_bar.index, Class_ACC_bar.Accuracy, color = 'lightgreen')
+plt.title('Accuracy with 10 Features')
+plt.ylim(0 , 1)
+plt.savefig('.\\Smart_Cities\\_viz\\__F10_ACC.png')
+plt.show()
+plt.clf()
+plt.cla()
+
+Class_ACC
+
+RF_FI = pd.DataFrame(index=features)
+RF_FI['Feature Importance'] = RF_features
+RF_FI.sort_values(by='Feature Importance', ascending=True,  inplace=True)
+
+#plot RF FI
+plt.barh(RF_FI.index, RF_FI['Feature Importance'], color = 'lightgreen')
+plt.title('Random Forest Feature Importance, 10 Feature Model')
+plt.savefig('.\\Smart_Cities\\_viz\\__RF_FI_10.png')
+plt.show()
+plt.clf()
+plt.cla()
+plt.close()
